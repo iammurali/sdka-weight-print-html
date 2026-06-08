@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bill Manager – Print & Edit</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a1a;
+    --paper: #fafaf7;
+    --accent: #c8320a;
+    --muted: #888;
+    --border: #d0cfc8;
+    --receipt-w: 320px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: #ece9e0;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--ink);
+    color: #fff;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  header h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #fff;
+  }
+  header span { color: var(--accent); }
+
+  .print-all-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 9px 22px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.15s;
+  }
+  .print-all-btn:hover { background: #a5280a; }
+
+  .bills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+    padding: 40px 32px;
+  }
+
+  /* === BILL CARD === */
+  .bill-card {
+    background: var(--paper);
+    width: var(--receipt-w);
+    border-radius: 2px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.13), 0 1px 3px rgba(0,0,0,0.08);
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .bill-card::before {
+    content: '';
+    display: block;
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--ink) 0 8px, transparent 8px 14px);
+    border-radius: 2px 2px 0 0;
+  }
+  .bill-card::after {
+    content: '';
+    display: block;
+    height: 6px;
+    background: repeating-linear-gradient(90deg, var(--ink) 0 8px, transparent 8px 14px);
+    border-radius: 0 0 2px 2px;
+  }
+
+  .bill-inner {
+    padding: 18px 20px;
+  }
+
+  .bill-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .print-single-btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 3px 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .print-single-btn:hover { background: var(--accent); color: #fff; }
+
+  /* receipt styling */
+  .receipt {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    border: 1px dashed var(--border);
+    padding: 14px 14px 10px;
+  }
+
+  .receipt-header {
+    text-align: center;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 10px;
+  }
+  .receipt-header .company {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+  }
+  .receipt-header .doc-type {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 5px 0;
+    gap: 8px;
+  }
+  .row .lbl {
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.68rem;
+  }
+  .row .val {
+    font-weight: 600;
+    text-align: right;
+    color: var(--ink);
+    font-size: 0.72rem;
+  }
+
+  .section-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 8px 0;
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 2px solid var(--ink);
+  }
+  .total-row .lbl { font-size: 0.8rem; font-weight: 700; }
+  .total-row .val { font-size: 0.9rem; font-weight: 700; color: var(--accent); }
+
+  .receipt-footer {
+    text-align: center;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    font-size: 0.6rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* editable inputs */
+  input[type="text"], input[type="number"] {
+    border: none;
+    background: transparent;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-align: right;
+    width: 100%;
+    outline: none;
+    border-bottom: 1px dashed transparent;
+    transition: border-color 0.15s;
+    padding: 1px 2px;
+  }
+  input[type="text"]:focus, input[type="number"]:focus {
+    border-bottom-color: var(--accent);
+    background: rgba(200,50,10,0.04);
+  }
+  input[type="text"].editable-center {
+    text-align: center;
+    font-weight: 700;
+  }
+
+  .total-input {
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    color: var(--accent) !important;
+    width: auto !important;
+    max-width: 140px;
+  }
+
+  /* === PRINT STYLES === */
+  @media print {
+    header, .bill-label, .print-all-btn, .print-single-btn { display: none !important; }
+    body { background: #fff; }
+
+    .bills-grid { 
+      display: block; 
+      padding: 0;
+    }
+
+    .bill-card {
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+      box-shadow: none;
+      page-break-after: always;
+      break-after: page;
+    }
+    .bill-card::before, .bill-card::after { display: none; }
+    .bill-inner { padding: 12px; }
+
+    input[type="text"], input[type="number"] {
+      border-bottom: none !important;
+      background: transparent !important;
+    }
+
+    .receipt { border: 1px dashed #999; }
+  }
+
+  @media print {
+    .no-print { display: none !important; }
+    .print-target { display: block !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>BILL <span>MANAGER</span></h1>
+  <button class="print-all-btn no-print" onclick="window.print()">⎙ PRINT ALL BILLS</button>
+</header>
+
+<div class="bills-grid" id="allBills">
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- BILL 1 & 4: Shri Aarupadai Minerals – Delivery Challan -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="bill-card" id="bill1">
+    <div class="bill-inner">
+      <div class="bill-label no-print">
+        Bill 1 — Delivery Challan (P SAND)
+        <button class="print-single-btn" onclick="printSingle('bill1')">⎙ Print</button>
+      </div>
+      <div class="receipt">
+        <div class="receipt-header">
+          <div class="company">Shri Aarupadai Minerals</div>
+          <div class="doc-type">Delivery Challan</div>
+          <div style="margin-top:6px; font-size:0.65rem;">
+            <div class="row">
+              <span class="lbl">Date:</span>
+              <input type="text" value="06-06-2026 10:47 am" style="text-align:right;max-width:160px;">
+            </div>
+            <div class="row">
+              <span class="lbl">DC/Ref #:</span>
+              <input type="text" value="7993" style="text-align:right;max-width:80px;">
+            </div>
+          </div>
+          <div style="font-weight:700;margin-top:6px;font-size:0.75rem;letter-spacing:0.08em;">OUTGOING TRIP</div>
+        </div>
+
+        <div class="row"><span class="lbl">Party:</span><div class="val"><input type="text" value="CASH PARTY"></div></div>
+        <div class="row"><span class="lbl">Loading:</span><div class="val"><input type="text" value="Crusher"></div></div>
+        <div class="row"><span class="lbl">UnLoading:</span><div class="val"><input type="text" value="PARTY SITE"></div></div>
+        <div class="row"><span class="lbl">Transport:</span><div class="val"><input type="text" value="CASH PARTY"></div></div>
+        <div class="row"><span class="lbl">Truck #:</span><div class="val"><input type="text" value="TN 19 CZ 2919"></div></div>
+        <div class="row"><span class="lbl">Item:</span><div class="val"><input type="text" value="P SAND"></div></div>
+
+        <hr class="section-divider">
+
+        <div class="row"><span class="lbl">Empty Qty:</span><div class="val"><input type="text" value="5.860 MT"></div></div>
+        <div class="row"><span class="lbl">Full Qty:</span><div class="val"><input type="text" value="16.660 MT"></div></div>
+        <div class="row"><span class="lbl">Net Qty:</span><div class="val"><input type="text" value="10.800 MT"></div></div>
+
+        <hr class="section-divider">
+
+        <div class="row"><span class="lbl">Unit Price:</span><div class="val"><input type="text" value="775.00"></div></div>
+        <div class="row"><span class="lbl">Subtotal:</span><div class="val"><input type="text" value="₹ 8,370.00"></div></div>
+
+        <div class="total-row">
+          <span class="lbl">Total:</span>
+          <input type="text" class="total-input" value="₹ 8,370.00">
+        </div>
+
+        <hr class="section-divider">
+        <div class="row"><span class="lbl">Payment Mode:</span><div class="val"><input type="text" value="Cash"></div></div>
+
+        <div class="receipt-footer">
+          Thank you for your business.<br>
+          Please visit Shri Aarupadai Minerals<br>
+          Call 0. to know more.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- BILL 2: Proforma Invoice – Water Wash M Sand -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="bill-card" id="bill2">
+    <div class="bill-inner">
+      <div class="bill-label no-print">
+        Bill 2 — Proforma Invoice (M SAND)
+        <button class="print-single-btn" onclick="printSingle('bill2')">⎙ Print</button>
+      </div>
+      <div class="receipt">
+        <div class="receipt-header">
+          <div class="company" style="font-size:0.8rem;">Proforma Invoice</div>
+          <div style="margin-top:6px; font-size:0.65rem;">
+            <div class="row">
+              <span class="lbl">Date:</span>
+              <input type="text" value="03/06/2026" style="text-align:right;max-width:100px;">
+            </div>
+            <div class="row">
+              <span class="lbl">Time:</span>
+              <input type="text" value="10:44" style="text-align:right;max-width:70px;">
+            </div>
+            <div class="row">
+              <span class="lbl">DC#:</span>
+              <input type="text" value="SO/0626/120" style="text-align:right;max-width:120px;">
+            </div>
+          </div>
+        </div>
+
+        <div class="row"><span class="lbl">Vehicle No:</span><div class="val"><input type="text" value="tn19cz2919"></div></div>
+        <div class="row"><span class="lbl">Party Name:</span><div class="val"><input type="text" value="VKM"></div></div>
+        <div class="row"><span class="lbl">Product:</span><div class="val"><input type="text" value="WATER WASH M SAND"></div></div>
+        <div class="row"><span class="lbl">Loading:</span><div class="val"><input type="text" value="Crusher 2"></div></div>
+        <div class="row"><span class="lbl">UnLoading:</span><div class="val"><input type="text" value="PARTY SITE"></div></div>
+        <div class="row"><span class="lbl">Driver:</span><div class="val"><input type="text" value=""></div></div>
+        <div class="row"><span class="lbl">Transporter:</span><div class="val"><input type="text" value="OTHER PARTY"></div></div>
+        <div class="row"><span class="lbl">HSN / SAC:</span><div class="val"><input type="text" value="2517"></div></div>
+
+        <hr class="section-divider">
+
+        <div class="row"><span class="lbl">Load Weight:</span><div class="val"><input type="text" value="14630"></div></div>
+        <div class="row"><span class="lbl">Empty Weight:</span><div class="val"><input type="text" value="6000"></div></div>
+        <div class="row"><span class="lbl">Net Weight:</span><div class="val"><input type="text" value="8630"></div></div>
+
+        <div class="receipt-footer">Thank you for your business.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- BILL 3: Weighment Bill – 20MM -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="bill-card" id="bill3">
+    <div class="bill-inner">
+      <div class="bill-label no-print">
+        Bill 3 — Weighment Bill (20MM)
+        <button class="print-single-btn" onclick="printSingle('bill3')">⎙ Print</button>
+      </div>
+      <div class="receipt">
+        <div class="receipt-header">
+          <div class="company" style="font-size:0.85rem; text-decoration:underline; text-underline-offset:3px;">WEIGHMENT BILL</div>
+        </div>
+
+        <div class="row"><span class="lbl">Date:</span><div class="val"><input type="text" value="02-06-2026 10:32 PM"></div></div>
+        <div class="row"><span class="lbl">Vehicle:</span><div class="val"><input type="text" value="TN19CZ2919"></div></div>
+        <div class="row"><span class="lbl">Material:</span><div class="val"><input type="text" value="20MM"></div></div>
+
+        <hr class="section-divider">
+
+        <div class="row"><span class="lbl">Gross Wt.:</span><div class="val"><input type="text" value="16680"></div></div>
+        <div class="row"><span class="lbl">Tare Wt.:</span><div class="val"><input type="text" value="5940"></div></div>
+        <div class="row"><span class="lbl">Net Wt.:</span><div class="val"><input type="text" value="10740"></div></div>
+
+        <hr class="section-divider">
+
+        <div class="total-row">
+          <span class="lbl">Amount:</span>
+          <input type="text" class="total-input" value="4830.00">
+        </div>
+
+        <div class="receipt-footer" style="text-align:left;margin-top:12px;color:#aaa;font-size:0.6rem;">
+          <input type="text" value="380113-270638-2" style="font-size:0.6rem;color:#aaa;font-weight:400;text-align:left;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- BILL 4: Duplicate of Bill 1 (same challan, second copy) -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <div class="bill-card" id="bill4">
+    <div class="bill-inner">
+      <div class="bill-label no-print">
+        Bill 4 — Delivery Challan Copy (P SAND)
+        <button class="print-single-btn" onclick="printSingle('bill4')">⎙ Print</button>
+      </div>
+      <div class="receipt">
+        <div class="receipt-header">
+          <div class="company">Shri Aarupadai Minerals</div>
+          <div class="doc-type">Delivery Challan</div>
+          <div style="margin-top:6px; font-size:0.65rem;">
+            <div class="row">
+              <span class="lbl">Date:</span>
+              <input type="text" value="06-06-2026 10:47 am" style="text-align:right;max-width:160px;">
+            </div>
+            <div class="row">
+              <span class="lbl">DC/Ref #:</span>
+              <input type="text" value="7993" style="text-align:right;max-width:80px;">
+            </div>
+          </div>
+          <div style="font-weight:700;margin-top:6px;font-size:0.75rem;letter-spacing:0.08em;">OUTGOING TRIP</div>
+        </div>
+
+        <div class="row"><span class="lbl">Party:</span><div class="val"><input type="text" value="CASH PARTY"></div></div>
+        <div class="row"><span class="lbl">Loading:</span><div class="val"><input type="text" value="Crusher"></div></div>
+        <div class="row"><span class="lbl">UnLoading:</span><div class="val"><input type="text" value="PARTY SITE"></div></div>
+        <div class="row"><span class="lbl">Transport:</span><div class="val"><input type="text" value="CASH PARTY"></div></div>
+        <div class="row"><span class="lbl">Truck #:</span><div class="val"><input type="text" value="TN 19 CZ 2919"></div></div>
+        <div class="row"><span class="lbl">Item:</span><div class="val"><input type="text" value="P SAND"></div></div>
+
+        <hr class="section-divider">
+
+        <div class="row"><span class="lbl">Empty Qty:</span><div class="val"><input type="text" value="5.860 MT"></div></div>
+        <div class="row"><span class="lbl">Full Qty:</span><div class="val"><input type="text" value="16.660 MT"></div></div>
+        <div class="row"><span class="lbl">Net Qty:</span><div class="val"><input type="text" value="10.800 MT"></div></div>
+
+        <hr class="section-divider">
+
+        <div class="row"><span class="lbl">Unit Price:</span><div class="val"><input type="text" value="775.00"></div></div>
+        <div class="row"><span class="lbl">Subtotal:</span><div class="val"><input type="text" value="₹ 8,370.00"></div></div>
+
+        <div class="total-row">
+          <span class="lbl">Total:</span>
+          <input type="text" class="total-input" value="₹ 8,370.00">
+        </div>
+
+        <hr class="section-divider">
+        <div class="row"><span class="lbl">Payment Mode:</span><div class="val"><input type="text" value="Cash"></div></div>
+
+        <div class="receipt-footer">
+          Thank you for your business.<br>
+          Please visit Shri Aarupadai Minerals<br>
+          Call 0. to know more.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /bills-grid -->
+
+<script>
+  function printSingle(billId) {
+    // Hide all bills except the target
+    const allBills = document.querySelectorAll('.bill-card');
+    allBills.forEach(b => {
+      if (b.id !== billId) b.style.display = 'none';
+    });
+    window.print();
+    // Restore all
+    allBills.forEach(b => b.style.display = '');
+  }
+</script>
+
+</body>
+</html>
