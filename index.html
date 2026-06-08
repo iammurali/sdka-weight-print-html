@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bill Manager – Print & Edit</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --ink: #1a1a1a;
@@ -127,10 +127,19 @@
 
   /* receipt styling */
   .receipt {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Courier Prime', 'Courier New', monospace;
     font-size: 0.72rem;
     border: 1px dashed var(--border);
     padding: 14px 14px 10px;
+  }
+  #bill1 .receipt, #bill1-copy .receipt {
+    border: none;
+    padding: 0;
+  }
+  #bill1 .bill-inner {
+    border: 2px dotted #555;
+    margin: 10px;
+    padding: 14px 16px;
   }
 
   .receipt-header {
@@ -171,12 +180,6 @@
     font-size: 0.72rem;
   }
 
-  .section-divider {
-    border: none;
-    border-top: 1px dashed var(--border);
-    margin: 8px 0;
-  }
-
   .total-row {
     display: flex;
     justify-content: space-between;
@@ -202,7 +205,7 @@
   input[type="text"], input[type="number"] {
     border: none;
     background: transparent;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: 'Courier Prime', 'Courier New', monospace;
     font-size: 0.72rem;
     font-weight: 600;
     color: var(--ink);
@@ -231,6 +234,9 @@
   }
 
   /* === PRINT STYLES === */
+  #bill1.bill-card::before, #bill1.bill-card::after {
+    display: none;
+  }
   @media print {
     header, .bill-label, .print-all-btn, .print-single-btn { display: none !important; }
     body { background: #fff; }
@@ -285,7 +291,7 @@
       </div>
       <div class="receipt">
         <div class="receipt-header">
-          <div class="company">Shri Aarupadai Minerals</div>
+          <img src="data:image/png;base64,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" style="width:160px;height:70px;display:block;margin:0 auto 4px;"><div class="company">Shri Aarupadai Minerals</div>
           <div class="doc-type">Delivery Challan</div>
           <div style="margin-top:6px; font-size:0.65rem;">
             <div class="row">
@@ -307,13 +313,13 @@
         <div class="row"><span class="lbl">Truck #:</span><div class="val"><input type="text" value="TN 19 CZ 2919"></div></div>
         <div class="row"><span class="lbl">Item:</span><div class="val"><input type="text" value="P SAND"></div></div>
 
-        <hr class="section-divider">
+        
 
         <div class="row"><span class="lbl">Empty Qty:</span><div class="val"><input type="text" value="5.860 MT"></div></div>
         <div class="row"><span class="lbl">Full Qty:</span><div class="val"><input type="text" value="16.660 MT"></div></div>
         <div class="row"><span class="lbl">Net Qty:</span><div class="val"><input type="text" value="10.800 MT"></div></div>
 
-        <hr class="section-divider">
+        
 
         <div class="row"><span class="lbl">Unit Price:</span><div class="val"><input type="text" value="775.00"></div></div>
         <div class="row"><span class="lbl">Subtotal:</span><div class="val"><input type="text" value="₹ 8,370.00"></div></div>
@@ -323,7 +329,7 @@
           <input type="text" class="total-input" value="₹ 8,370.00">
         </div>
 
-        <hr class="section-divider">
+        
         <div class="row"><span class="lbl">Payment Mode:</span><div class="val"><input type="text" value="Cash"></div></div>
 
         <div class="receipt-footer">
@@ -372,7 +378,7 @@
         <div class="row"><span class="lbl">Transporter:</span><div class="val"><input type="text" value="OTHER PARTY"></div></div>
         <div class="row"><span class="lbl">HSN / SAC:</span><div class="val"><input type="text" value="2517"></div></div>
 
-        <hr class="section-divider">
+        
 
         <div class="row"><span class="lbl">Load Weight:</span><div class="val"><input type="text" value="14630"></div></div>
         <div class="row"><span class="lbl">Empty Weight:</span><div class="val"><input type="text" value="6000"></div></div>
@@ -386,101 +392,31 @@
   <!-- ═══════════════════════════════════════════════ -->
   <!-- BILL 3: Weighment Bill – 20MM -->
   <!-- ═══════════════════════════════════════════════ -->
-  <div class="bill-card" id="bill3">
-    <div class="bill-inner">
-      <div class="bill-label no-print">
-        Bill 3 — Weighment Bill (20MM)
-        <button class="print-single-btn" onclick="printSingle('bill3')">⎙ Print</button>
+  <div class="bill-card" id="bill3" style="background:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.1);border-radius:0;width:320px;">
+    <div class="bill-inner" style="padding:18px 16px 14px;">
+      <div class="bill-label no-print" style="font-family:'IBM Plex Mono',monospace;font-size:0.65rem;font-weight:700;letter-spacing:0.12em;color:#c8320a;text-transform:uppercase;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+        Bill 3 — Weighment Bill
+        <button class="print-single-btn no-print" onclick="printSingle('bill3')" style="background:transparent;border:1px solid #c8320a;color:#c8320a;padding:3px 10px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;font-weight:600;cursor:pointer;">⎙ Print</button>
       </div>
-      <div class="receipt">
-        <div class="receipt-header">
-          <div class="company" style="font-size:0.85rem; text-decoration:underline; text-underline-offset:3px;">WEIGHMENT BILL</div>
-        </div>
-
-        <div class="row"><span class="lbl">Date:</span><div class="val"><input type="text" value="02-06-2026 10:32 PM"></div></div>
-        <div class="row"><span class="lbl">Vehicle:</span><div class="val"><input type="text" value="TN19CZ2919"></div></div>
-        <div class="row"><span class="lbl">Material:</span><div class="val"><input type="text" value="20MM"></div></div>
-
-        <hr class="section-divider">
-
-        <div class="row"><span class="lbl">Gross Wt.:</span><div class="val"><input type="text" value="16680"></div></div>
-        <div class="row"><span class="lbl">Tare Wt.:</span><div class="val"><input type="text" value="5940"></div></div>
-        <div class="row"><span class="lbl">Net Wt.:</span><div class="val"><input type="text" value="10740"></div></div>
-
-        <hr class="section-divider">
-
-        <div class="total-row">
-          <span class="lbl">Amount:</span>
-          <input type="text" class="total-input" value="4830.00">
-        </div>
-
-        <div class="receipt-footer" style="text-align:left;margin-top:12px;color:#aaa;font-size:0.6rem;">
-          <input type="text" value="380113-270638-2" style="font-size:0.6rem;color:#aaa;font-weight:400;text-align:left;">
-        </div>
+      <div style="font-family:'Courier Prime','Courier New',monospace;font-size:0.78rem;color:#000;line-height:1.9;">
+        <div style="text-align:center;font-weight:700;font-size:0.85rem;text-decoration:underline;margin-bottom:10px;">WEIGHMENT BILL</div>
+        <div style="display:flex;justify-content:space-between;"><span>Date</span><span>: <input type="text" value="02-06-2026 10:32 PM" style="border:none;background:transparent;font-family:'Courier Prime','Courier New',monospace;font-size:0.78rem;font-weight:400;color:#000;outline:none;border-bottom:1px dashed transparent;width:170px;" onfocus="this.style.borderBottomColor='#c8320a'" onblur="this.style.borderBottomColor='transparent'"></span></div>
+        <div style="display:flex;justify-content:space-between;"><span>Vehicle</span><span>: <input type="text" value="TN19CZ2919" style="border:none;background:transparent;font-family:'Courier Prime','Courier New',monospace;font-size:0.78rem;font-weight:400;color:#000;outline:none;border-bottom:1px dashed transparent;width:170px;" onfocus="this.style.borderBottomColor='#c8320a'" onblur="this.style.borderBottomColor='transparent'"></span></div>
+        <div style="display:flex;justify-content:space-between;"><span>Material</span><span>: <input type="text" value="20MM" style="border:none;background:transparent;font-family:'Courier Prime','Courier New',monospace;font-size:0.78rem;font-weight:400;color:#000;outline:none;border-bottom:1px dashed transparent;width:170px;" onfocus="this.style.borderBottomColor='#c8320a'" onblur="this.style.borderBottomColor='transparent'"></span></div>
+        <div style="margin:6px 0;border-top:1px solid #000;"></div>
+        <div style="display:flex;justify-content:space-between;"><span>Gross Wt.</span><span>: <input type="text" value="16680" style="border:none;background:transparent;font-family:'Courier Prime','Courier New',monospace;font-size:0.78rem;font-weight:400;color:#000;outline:none;border-bottom:1px dashed transparent;width:170px;" onfocus="this.style.borderBottomColor='#c8320a'" onblur="this.style.borderBottomColor='transparent'"></span></div>
+        <div style="display:flex;justify-content:space-between;"><span>Tare Wt.</span><span>: <input type="text" value="5940" style="border:none;background:transparent;font-family:'Courier Prime','Courier New',monospace;font-size:0.78rem;font-weight:400;color:#000;outline:none;border-bottom:1px dashed transparent;width:170px;" onfocus="this.style.borderBottomColor='#c8320a'" onblur="this.style.borderBottomColor='transparent'"></span></div>
+        <div style="display:flex;justify-content:space-between;"><span>Net Wt.</span><span>: <input type="text" value="10740" style="border:none;background:transparent;font-family:'Courier Prime','Courier New',monospace;font-size:0.78rem;font-weight:400;color:#000;outline:none;border-bottom:1px dashed transparent;width:170px;" onfocus="this.style.borderBottomColor='#c8320a'" onblur="this.style.borderBottomColor='transparent'"></span></div>
+        <div style="margin:6px 0;border-top:1px solid #000;"></div>
+        <div style="display:flex;justify-content:space-between;"><span>Amount</span><span>: <input type="text" value="4830.00" style="border:none;background:transparent;font-family:'Courier Prime','Courier New',monospace;font-size:0.78rem;font-weight:400;color:#000;outline:none;border-bottom:1px dashed transparent;width:170px;" onfocus="this.style.borderBottomColor='#c8320a'" onblur="this.style.borderBottomColor='transparent'"></span></div>
+        <div style="margin-top:14px;font-size:0.65rem;color:#555;"><input type="text" value="380113-270638-2" style="border:none;background:transparent;font-family:'Courier Prime','Courier New',monospace;font-size:0.65rem;color:#555;outline:none;width:100%;"></div>
       </div>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════ -->
   <!-- BILL 4: Duplicate of Bill 1 (same challan, second copy) -->
-  <!-- ═══════════════════════════════════════════════ -->
-  <div class="bill-card" id="bill4">
-    <div class="bill-inner">
-      <div class="bill-label no-print">
-        Bill 4 — Delivery Challan Copy (P SAND)
-        <button class="print-single-btn" onclick="printSingle('bill4')">⎙ Print</button>
-      </div>
-      <div class="receipt">
-        <div class="receipt-header">
-          <div class="company">Shri Aarupadai Minerals</div>
-          <div class="doc-type">Delivery Challan</div>
-          <div style="margin-top:6px; font-size:0.65rem;">
-            <div class="row">
-              <span class="lbl">Date:</span>
-              <input type="text" value="06-06-2026 10:47 am" style="text-align:right;max-width:160px;">
-            </div>
-            <div class="row">
-              <span class="lbl">DC/Ref #:</span>
-              <input type="text" value="7993" style="text-align:right;max-width:80px;">
-            </div>
-          </div>
-          <div style="font-weight:700;margin-top:6px;font-size:0.75rem;letter-spacing:0.08em;">OUTGOING TRIP</div>
-        </div>
-
-        <div class="row"><span class="lbl">Party:</span><div class="val"><input type="text" value="CASH PARTY"></div></div>
-        <div class="row"><span class="lbl">Loading:</span><div class="val"><input type="text" value="Crusher"></div></div>
-        <div class="row"><span class="lbl">UnLoading:</span><div class="val"><input type="text" value="PARTY SITE"></div></div>
-        <div class="row"><span class="lbl">Transport:</span><div class="val"><input type="text" value="CASH PARTY"></div></div>
-        <div class="row"><span class="lbl">Truck #:</span><div class="val"><input type="text" value="TN 19 CZ 2919"></div></div>
-        <div class="row"><span class="lbl">Item:</span><div class="val"><input type="text" value="P SAND"></div></div>
-
-        <hr class="section-divider">
-
-        <div class="row"><span class="lbl">Empty Qty:</span><div class="val"><input type="text" value="5.860 MT"></div></div>
-        <div class="row"><span class="lbl">Full Qty:</span><div class="val"><input type="text" value="16.660 MT"></div></div>
-        <div class="row"><span class="lbl">Net Qty:</span><div class="val"><input type="text" value="10.800 MT"></div></div>
-
-        <hr class="section-divider">
-
-        <div class="row"><span class="lbl">Unit Price:</span><div class="val"><input type="text" value="775.00"></div></div>
-        <div class="row"><span class="lbl">Subtotal:</span><div class="val"><input type="text" value="₹ 8,370.00"></div></div>
-
-        <div class="total-row">
-          <span class="lbl">Total:</span>
-          <input type="text" class="total-input" value="₹ 8,370.00">
-        </div>
-
-        <hr class="section-divider">
-        <div class="row"><span class="lbl">Payment Mode:</span><div class="val"><input type="text" value="Cash"></div></div>
-
-        <div class="receipt-footer">
-          Thank you for your business.<br>
-          Please visit Shri Aarupadai Minerals<br>
-          Call 0. to know more.
-        </div>
-      </div>
-    </div>
-  </div>
+  
 
 </div><!-- /bills-grid -->
 
