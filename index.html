@@ -148,6 +148,14 @@
     border-bottom: 1px dashed var(--border);
     padding-bottom: 10px;
   }
+  .receipt-header .receipt-logo {
+    display: block;
+    width: 100% !important;
+    max-width: 78mm;
+    height: auto !important;
+    object-fit: contain;
+    margin: 0 auto 4px !important;
+  }
   .receipt-header .company {
     font-size: 0.85rem;
     font-weight: 700;
@@ -162,7 +170,6 @@
 
   .row {
     display: flex;
-    justify-content: space-between;
     align-items: baseline;
     margin: 7px 0;
     gap: 8px;
@@ -170,10 +177,11 @@
   .row .lbl {
     color: var(--muted);
     white-space: nowrap;
-    flex-shrink: 0;
+    flex: 0 0 100px;
     font-size: 0.8rem;
   }
   .row .val {
+    flex: 1 1 auto;
     font-weight: 600;
     text-align: right;
     color: var(--ink);
@@ -281,9 +289,11 @@
 
     /* Logo - fit properly on thermal paper */
     .receipt-logo {
-      width: 38mm !important;
-      height: 18mm !important;
       display: block !important;
+      width: 100% !important;
+      max-width: 38mm !important;
+      height: auto !important;
+      object-fit: contain !important;
       margin: 0 auto 2mm !important;
     }
 
