@@ -305,6 +305,10 @@
       color: #000 !important;
     }
 
+    .print-hidden {
+      display: none !important;
+    }
+
     .row { margin: 2.5mm 0 !important; }
     .row .lbl { font-size: 9.5pt !important; color: #000 !important; }
     .row .val { font-size: 9.5pt !important; }
@@ -496,14 +500,42 @@
 
 <script>
   function printSingle(billId) {
-    // Hide all bills except the target
-    const allBills = document.querySelectorAll('.bill-card');
+    const allBills = Array.from(document.querySelectorAll('.bill-card'));
+    const targetBill = document.getElementById(billId);
+    if (!targetBill) return;
+
     allBills.forEach(b => {
-      if (b.id !== billId) b.style.display = 'none';
+      if (b !== targetBill) {
+        b.classList.add('print-hidden');
+      }
     });
+
+    function restoreBills() {
+      allBills.forEach(b => b.classList.remove('print-hidden'));
+      window.removeEventListener('afterprint', restoreBills);
+      const mq = window.matchMedia('print');
+      if (mq.removeEventListener) {
+        mq.removeEventListener('change', handlePrintChange);
+      } else if (mq.removeListener) {
+        mq.removeListener(handlePrintChange);
+      }
+    }
+
+    function handlePrintChange(event) {
+      if (!event.matches) {
+        restoreBills();
+      }
+    }
+
+    window.addEventListener('afterprint', restoreBills);
+    const mediaQuery = window.matchMedia('print');
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handlePrintChange);
+    } else if (mediaQuery.addListener) {
+      mediaQuery.addListener(handlePrintChange);
+    }
+
     window.print();
-    // Restore all
-    allBills.forEach(b => b.style.display = '');
   }
 </script>
 
